@@ -4,28 +4,31 @@ const { v4: uuidv4 } = require("uuid");
 
 const contactsPath = path.join(__dirname, "./db/contacts.json");
 
+const wrapper = (func) => {
+  const fc = async () => {
+    try {
+      func();
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  return func;
+};
+
 async function listContacts() {
-  try {
-    const data = await fs.readFile(contactsPath);
-    return JSON.parse(data);
-  } catch (error) {
-    console.log(error.message);
-  }
+  const data = await fs.readFile(contactsPath);
+  return JSON.parse(data);
 }
 
 async function getContactById(contactId) {
-  try {
-    const contacts = await listContacts();
-    const contact = contacts.find((item) => item.id === contactId);
+  const contacts = await listContacts();
+  const contact = contacts.find((item) => item.id === contactId);
 
-    if (!contact) {
-      return null;
-    }
-
-    return contact;
-  } catch (error) {
-    console.log(error.message);
+  if (!contact) {
+    return null;
   }
+
+  return contact;
 }
 
 async function removeContact(contactId) {
@@ -56,8 +59,8 @@ async function addContact(name, email, phone) {
 }
 
 module.exports = {
-  listContacts,
-  getContactById,
-  removeContact,
-  addContact,
+  listContacts: wrapper(listContacts),
+  getContactById: wrapper(getContactById),
+  removeContact: wrapper(removeContact),
+  addContact: wrapper(addContact),
 };
